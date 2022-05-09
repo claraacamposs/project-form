@@ -1,5 +1,5 @@
 /* eslint-disable array-callback-return */
-import React, { useState, FormEvent } from "react";
+import React, { useState, FormEvent, useEffect } from "react";
 import LoadStatus from "../../components/LoadStatus";
 import { Button, Input, InputMasked } from "../../components/FormElements";
 import { Page, Form, ContentForm, Title, InputsContainer } from "./styles";
@@ -15,6 +15,21 @@ const Home = () => {
     "sucess" | "error" | "loading" | "none" | "invalid"
   >("none");
 
+  const [reload, setReload] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (statusForm !== "none") {
+      setTimeout(() => {
+        setStatusForm("none");
+      }, 2000);
+    }
+  }, [statusForm]);
+
+  useEffect(() => {
+    const registros = window.localStorage.getItem("Name");
+    console.log(registros);
+  }, [reload]);
+
   const [formdata, setFormdata] = useState({
     fullName: "",
     Phone: "",
@@ -28,9 +43,18 @@ const Home = () => {
     event.preventDefault();
     setStatusForm("loading");
 
-    if (handleInvalidInputs()) {
+    const checkErrors = handleInvalidInputs();
+
+    let data = [];
+    data.push(formdata);
+
+    window.localStorage.setItem("Name", JSON.stringify(data));
+
+    if (checkErrors) {
       setStatusForm("invalid");
-      return;
+    } else {
+      setStatusForm("sucess");
+      setReload(!reload);
     }
   }
 
@@ -98,7 +122,7 @@ const Home = () => {
               />
 
               <InputMasked
-                mask={"(99) 9999-9999"}
+                mask={"(99) 9999-99999"}
                 label="Contato"
                 type="Pho"
                 name="Phone"
